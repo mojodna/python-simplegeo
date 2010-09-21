@@ -168,6 +168,10 @@ class Client(object):
         endpoint = self.endpoint('record', layer=layer, id=id)
         self._request(endpoint, "DELETE")
 
+    def delete_records(self, layer, ids):
+        endpoint = self.endpoint('record', layer=layer, id=','.join(ids))
+        self._request(endpoint, "DELETE")
+
     def get_record(self, layer, id):
         endpoint = self.endpoint('record', layer=layer, id=id)
         return self._request(endpoint, "GET")
