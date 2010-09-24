@@ -106,6 +106,9 @@ class Client(object):
     realm = "http://api.simplegeo.com"
     debug = False
     endpoints = {
+        'association': 'associations/%(layer)s/%(id)s/%(layer2)s/%(id2)s.json',
+        'associations_by_layer': 'associations/%(layer)s.json',
+        'associations_by_layer_and_id': 'associations/%(layer)s/%(id)s.json',
         'record': 'records/%(layer)s/%(id)s.json',
         'records': 'records/%(layer)s/%(ids)s.json',
         'add_records': 'records/%(layer)s.json',
@@ -147,6 +150,31 @@ class Client(object):
         except KeyError, e:
             raise TypeError('Missing required argument "%s"' % (e.args[0],))
         return urljoin(urljoin(self.uri, self.api_version + '/'), endpoint)
+
+    def add_association(self, layer, id, layer2, id2, properties, created=int(time.time())):
+        association = {
+            "created": created,
+            "properties": properties,
+        }
+        endpoint = self.endpoint('association', layer=layer, id=id, layer2=layer2, id2=id2)
+        return self._request(endpoint, "POST", association.to_json())
+
+    def delete_association(self, layer, id, layer2, id2):
+        endpoint = self.endpoint('association', layer=layer, id=id, layer2=layer2, id2=id2)
+        return self._request(endpoint, "DELETE")
+
+    def get_association(self, layer, id, layer2, id2):
+        endpoint = self.endpoint('association', layer=layer, id=id, layer2=layer2, id2=id2)
+        return self._request(endpoint, "GET")
+
+    def get_associations(self, layer, id=None):
+        if id:
+            endpoint = self.endpoint('associations_by_layer_and_id', layer=layer, id=id)
+        else:
+            endpoint = self.endpoint('associations_by_layer', layer=layer)
+        return self._request(endpoint, "GET")
+
+    update_association = create_association
 
     def add_record(self, record):
         if not hasattr(record, 'layer'):
